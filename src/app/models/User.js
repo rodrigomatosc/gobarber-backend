@@ -1,5 +1,5 @@
-import Sequelize, { Model } from 'sequelize';
-import bcripty from 'bcryptjs';
+import Sequelize, { Model } from "sequelize";
+import bcripty from "bcryptjs";
 
 class User extends Model {
   static init(sequelize) {
@@ -16,9 +16,13 @@ class User extends Model {
       }
     );
 
-    this.addHook('beforeSave', async user => {
+    this.addHook("beforeSave", async user => {
       user.password_hash = await bcripty.hash(user.password, 8);
     });
+  }
+
+  static associate(models) {
+    this.belongsTo(models.File, { foreignKey: "avatar_id", as: "avatar" });
   }
 
   checkPassword(password) {
