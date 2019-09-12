@@ -9,6 +9,7 @@ import ProviderController from "./app/controllers/ProviderController";
 import ApponimentsController from "./app/controllers/AppointmentController";
 import SchedulerController from "./app/controllers/SchedulerController";
 import NotificationController from "./app/controllers/NotificationController";
+import AvailableControlle from "./app/controllers/AvailableControlle";
 
 const routes = new Router();
 const upload = multer(multerConfig);
@@ -41,5 +42,12 @@ routes.get("/schedule", authMiddleware, SchedulerController.index);
 // ############ routes for notifications ################ //
 routes.get("/notifications", authMiddleware, NotificationController.index);
 routes.put("/notifications/:id", authMiddleware, NotificationController.update);
+
+// ############ routes for notifications ################ //
+routes.get(
+  "/providers/:providerId/available",
+  authMiddleware,
+  AvailableControlle.index
+);
 
 export default routes;

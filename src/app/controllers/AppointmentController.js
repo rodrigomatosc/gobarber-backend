@@ -4,7 +4,8 @@ import User from "../models/User";
 import { startOfHour, parseISO, isBefore, format, subHours } from "date-fns";
 import File from "../models/file";
 import Notification from "../schemas/Notification";
-import Mail from "../../lib/Mail";
+import Queue from "../../lib/Queue";
+import CancellationJob from "../jobs/CancellationMail";
 
 class AppointmentConroller {
   async index(req, res) {
@@ -16,7 +17,7 @@ class AppointmentConroller {
         canceled_at: null
       },
       order: ["date"],
-      attributes: ["id", "date"],
+      attributes: ["id", "date", "past", "cancelable"],
       limit: 20,
       offset: (page - 1) * 20,
       include: [
@@ -139,16 +140,8 @@ class AppointmentConroller {
 
     await appointment.save();
 
-    await Mail.sendMail({
-      to: `${appointment.provider.name} <${appointment.provider.email}>`,
-      subject: "Agendamento Cancelado",
-      template: "cancellation",
-      context: {
-        provider: appointment.provider.name,
-        user: appointment.user.name,
-        date: format(appointment.date, "'dia' dd 'de' MMMM ', ás' H:mm 'h'")
-      }
-    });
+    console.log("CANCELATION QUEUE", CancellationJob.key);
+    Queue.add(CancellationJob.key, { appointment });
 
     return res.json(appointment);
   }
